@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sterling | Gastro Pub Казань</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;700&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- React & Icons -->
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.2.0",
+        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+        "lucide-react": "https://esm.sh/lucide-react@0.263.1"
+      }
+    }
+    </script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        oswald: ['Oswald', 'sans-serif'],
+                        sans: ['Manrope', 'sans-serif'], 
+                    },
+                    colors: {
+                        'sterling-black': '#0A0A0A',
+                        'sterling-card': '#141414',
+                        'sterling-silver': '#E0E0E0',
+                        'sterling-accent': '#D4AF37', 
+                    },
+                    backgroundImage: {
+                        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #050505; color: #E0E0E0; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .glass-panel {
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .text-outline {
+            -webkit-text-stroke: 1px rgba(255, 255, 255, 0.2);
+            color: transparent;
+        }
+
+        /* Fix for smooth scrolling offset */
+        html {
+            scroll-padding-top: 100px;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-up { animation: fadeIn 0.6s ease-out forwards; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel" data-type="module">
+        import React, { useState, useEffect } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import { Menu, MapPin, Phone, Clock, Instagram, X, ArrowRight, Flame, Beer, Utensils, Wheat, PhoneCall, Cookie } from 'lucide-react';
+
+        const menuData = {
+            ribs: {
+                title: "Мясо & Ребра",
+                icon: <Flame size={18} />,
+                items: [
+                    { name: "Стейк Рибай", price: "1100 ₽", desc: "Подается с соусом BBQ" },
+                    { name: "Стейк из лосося", price: "1390 ₽", desc: "С соусом тар-тар, оливками и лимоном" },
+                    { name: "Техасский Брискет", price: "1390 ₽", desc: "С соусом BBQ, халапеньо, мар. луком, картофелем и соленьями" },
+                    { name: "Колбаски на сковородке", price: "840 ₽", desc: "С картофелем, опятами и корнишонами" },
+                    { name: "Говяжьи ребра BBQ", price: "1850 ₽", weight: "500 г", desc: "С битыми огурцами и хашбрауном" },
+                    { name: "Говяжьи ребра в сырной лаве", price: "1850 ₽", weight: "500 г", desc: "С песто и гигантскими оливками" },
+                    { name: "Говяжьи ребра Ананас-Чили", price: "1850 ₽", weight: "500 г", desc: "С бататом фри" },
+                    { name: "Говяжьи ребра Острые", price: "1850 ₽", weight: "500 г", desc: "С халапеньо и квашеной капустой" },
+                    { name: "Говяжьи ребра Сливовые", price: "1850 ₽", weight: "500 г", desc: "С кукурузой гриль" },
+                    { name: "Говяжьи ребра Сметанно-горчичные", price: "1850 ₽", weight: "500 г", desc: "С маринованными опятами и жареным картофелем" },
+                    { name: "Свиные ребра BBQ", price: "1290 ₽", weight: "400 г", desc: "С битыми огурцами и хашбрауном" },
+                    { name: "Свиные ребра в сырной лаве", price: "1290 ₽", weight: "400 г", desc: "С песто и гигантскими оливками" },
+                    { name: "Свиные ребра Ананас-Чили", price: "1290 ₽", weight: "400 г", desc: "С бататом фри" },
+                    { name: "Свиные ребра Острые", price: "1290 ₽", weight: "400 г", desc: "С халапеньо и квашеной капустой" }
+                ]
+            },
+            burgers: {
+                title: "Бургеры",
+                icon: <Utensils size={18} />,
+                items: [
+                    { name: "Месть мясника", price: "1100 ₽", desc: "Две говяжьи котлеты, чеддер, гриль соус, бекон, битые огурцы" },
+                    { name: "Бургер с ребром", price: "990 ₽", desc: "Говяжье ребро, чеддер, томат, релиш, соуса сливовый/гриль/BBQ" },
+                    { name: "Бургер в сырной лаве", price: "730 ₽", desc: "Куриная котлета, чеддер, чесночный соус, бекон, зеленый лук" }
+                ]
+            },
+            beer_snacks: {
+                title: "К пиву & Сеты",
+                icon: <Beer size={18} />,
+                items: [
+                    { name: "Сет колбас", price: "2800 ₽", desc: "11 видов колбас, соусы, квашеная капуста, корнишоны, бейби картофель" },
+                    { name: "Пивной сет Фри", price: "1850 ₽", desc: "Стрипсы, хашбраун, крылья, гренки, сырные палочки, пельмени, соусы" },
+                    { name: "Магаданские креветки", price: "1800 ₽", desc: "Отварные или жареные" },
+                    { name: "Креветки темпура", price: "820 ₽", desc: "С соусом манго-чили" },
+                    { name: "Запеченые мидии киви", price: "560 ₽", desc: "" },
+                    { name: "Куриные крылья", price: "520 ₽", desc: "Соус на выбор: BBQ, кисло-сладкий, горчичный, сырный, гриль" },
+                    { name: "Мозговые кости", price: "490 ₽", desc: "С чесноком и хлебом" },
+                    { name: "Картофель фри с колбасками", price: "380 ₽", desc: "Или с беконом. Соусы BBQ и гриль" },
+                    { name: "Жареные пельмени", price: "380 ₽", desc: "Из говядины" },
+                    { name: "Сырные палочки", price: "350 ₽", desc: "С брусничным соусом" },
+                    { name: "Гренки чесночные", price: "290 ₽", desc: "С соусом тар-тар" },
+                    { name: "Оливки фри", price: "280 ₽", desc: "" }
+                ]
+            },
+            starters: {
+                title: "Закуски",
+                icon: <Wheat size={18} />,
+                items: [
+                    { name: "Тар-тар из говядины", price: "840 ₽", desc: "На кости" },
+                    { name: "Тар-тар из лосося", price: "720 ₽", desc: "На рисовых чипсах" },
+                    { name: "Сельдь с картофелем", price: "550 ₽", desc: "С молодым картофелем" },
+                    { name: "Сет разносов 'Я в Щи'", price: "360 ₽", desc: "Маринованные опята, корнишоны, сало, форшмак, хлеб" },
+                    { name: "Корюшка", price: "670 ₽", weight: "100 г", desc: "" },
+                    { name: "Ассорти орехов", price: "490 ₽", desc: "Фисташки, кешью, миндаль, арахис" },
+                    { name: "Сыровяленое мясо", price: "420 ₽", desc: "В ассортименте" },
+                    { name: "Фисташки", price: "390 ₽", desc: "" },
+                    { name: "Сыр 'Чечил'", price: "310 ₽", desc: "" }
+                ]
+            },
+            salads_soups: {
+                title: "Салаты и Супы",
+                icon: <Utensils size={18} />,
+                items: [
+                    { name: "Томатный суп", price: "790 ₽", desc: "С креветками и страчателлой" },
+                    { name: "Борщ с брискетом", price: "660 ₽", desc: "Со стопкой Хреновухи, салом, хлебом и сметаной" },
+                    { name: "Пельмени с бульоном", price: "470 ₽", desc: "Со сметаной и зеленью" },
+                    { name: "Салат с лососем", price: "790 ₽", desc: "Микс салата, с/с лосось, тар-тар из огурца, лемонграсс" },
+                    { name: "Салат с ростбифом", price: "740 ₽", desc: "Микс салата, печеный перец, соус 'Копченый чили'" },
+                    { name: "Салат Томат", price: "620 ₽", desc: "Со страчателлой, песто и грецким орехом" }
+                ]
+            },
+            pies: {
+                title: "Пироги и Десерты",
+                icon: <Cookie size={18} />,
+                items: [
+                    { name: "Пирог с брискетом", price: "650 ₽", desc: "Подается со сметаной" },
+                    { name: "Пирог сырный", price: "450 ₽", desc: "С яичным желтком" },
+                    { name: "Десерты в ассортименте", price: "390 ₽", desc: "" }
+                ]
+            },
+            sides: {
+                title: "Гарниры",
+                icon: <Utensils size={18} />,
+                items: [
+                    { name: "Овощи гриль", price: "350 ₽", desc: "" },
+                    { name: "Кукуруза гриль", price: "300 ₽", desc: "" },
+                    { name: "Картофельное пюре", price: "250 ₽", desc: "" },
+                    { name: "Батат / Картофель фри", price: "200 ₽", desc: "" },
+                    { name: "Картофель Айдахо", price: "200 ₽", desc: "" },
+                    { name: "Доп. закуска", price: "180 ₽", desc: "Халапеньо, капуста, оливки, томаты, огурцы или опята" },
+                    { name: "Соус в ассортименте", price: "100 ₽", desc: "" },
+                    { name: "Хлеб тартин / Булочка", price: "60-70 ₽", desc: "Пшеничный или ржаной" }
+                ]
+            }
+        };
+
+        const App = () => {
+            const [activeCategory, setActiveCategory] = useState('ribs');
+            const [isMenuOpen, setIsMenuOpen] = useState(false);
+            const [isModalOpen, setIsModalOpen] = useState(false);
+            const [scrolled, setScrolled] = useState(false);
+
+            useEffect(() => {
+                const handleScroll = () => setScrolled(window.scrollY > 50);
+                window.addEventListener('scroll', handleScroll);
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            const scrollTo = (id) => {
+                setIsMenuOpen(false);
+                document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+            };
+
+            return (
+                <div className="min-h-screen flex flex-col font-sans bg-sterling-black text-gray-200 selection:bg-sterling-accent selection:text-black">
+                    {/* Floating Navbar */}
+                    <div className="fixed top-0 left-0 right-0 z-50 p-4">
+                        <nav className={`mx-auto max-w-6xl rounded-2xl transition-all duration-300 ${scrolled ? 'glass-panel py-3 px-6 shadow-2xl' : 'py-4 px-4 bg-transparent'}`}>
+                            <div className="flex justify-between items-center">
+                                <div className="flex items-center gap-3 cursor-pointer group" onClick={() => scrollTo('hero')}>
+                                    <div className="relative">
+                                        <div className="absolute inset-0 bg-white/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition duration-500"></div>
+                                        <img 
+                                            src="image_158898.png" 
+                                            alt="Sterling" 
+                                            className="relative h-10 w-10 object-contain rounded-full bg-black/50" 
+                                        />
+                                    </div>
+                                    <div className="font-oswald text-xl font-bold tracking-widest uppercase text-white hidden sm:block">
+                                        Sterling
+                                    </div>
+                                </div>
+                                
+                                <div className="hidden md:flex items-center space-x-1">
+                                    {['about', 'menu', 'contacts'].map((item) => (
+                                        <button 
+                                            key={item}
+                                            onClick={() => scrollTo(item)} 
+                                            className="px-5 py-2 text-sm font-semibold uppercase tracking-wider text-gray-400 hover:text-white transition-colors rounded-full hover:bg-white/5"
+                                        >
+                                            {item === 'about' ? 'О нас' : item === 'menu' ? 'Меню' : 'Контакты'}
+                                        </button>
+                                    ))}
+                                </div>
+                                
+                                <div className="flex items-center gap-3">
+                                    <button onClick={() => setIsModalOpen(true)} className="hidden sm:block bg-white text-black px-6 py-2.5 rounded-xl text-sm font-bold uppercase tracking-wide hover:bg-sterling-accent hover:scale-105 transition duration-300">
+                                        Бронь стола
+                                    </button>
+                                    <button className="md:hidden p-2 text-white bg-white/10 rounded-lg backdrop-blur-sm" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                                        {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                                    </button>
+                                </div>
+                            </div>
+                        </nav>
+                    </div>
+
+                    {/* Mobile Menu Overlay */}
+                    {isMenuOpen && (
+                        <div className="fixed inset-0 z-40 bg-black/95 backdrop-blur-xl pt-24 px-6 flex flex-col items-center gap-8 animate-fade-up">
+                            <button onClick={() => scrollTo('about')} className="text-3xl font-oswald uppercase text-white">О нас</button>
+                            <button onClick={() => scrollTo('menu')} className="text-3xl font-oswald uppercase text-white">Меню</button>
+                            <button onClick={() => scrollTo('contacts')} className="text-3xl font-oswald uppercase text-white">Контакты</button>
+                            <div className="w-full h-px bg-white/10 my-4"></div>
+                            <a href="tel:+78432605000" className="text-xl font-bold text-sterling-accent">+7 (843) 260-50-00</a>
+                            <button onClick={() => {setIsModalOpen(true); setIsMenuOpen(false);}} className="w-full max-w-xs bg-white text-black py-4 rounded-xl text-lg font-bold uppercase mt-auto mb-10">
+                                Забронировать
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Hero Section */}
+                    <section id="hero" className="relative h-screen flex items-end pb-20 md:pb-32 justify-center overflow-hidden">
+                        <div className="absolute inset-0 z-0">
+                            <img src="image_1588b8.jpg" alt="Interior" className="w-full h-full object-cover brightness-[0.35]" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/50 to-transparent"></div>
+                            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150"></div>
+                        </div>
+                        
+                        <div className="relative z-10 container mx-auto px-4 text-center">
+                            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm text-xs font-bold tracking-[0.2em] uppercase text-sterling-accent mb-6 animate-fade-up">
+                                Gastro Pub & Bar
+                            </div>
+                            <h1 className="font-oswald text-6xl md:text-9xl text-white font-bold leading-[0.9] uppercase tracking-tighter mb-8 animate-fade-up" style={{animationDelay: '0.1s'}}>
+                                Sterling <br/>
+                                <span className="text-outline">Gastro</span>
+                            </h1>
+                            <p className="text-lg md:text-xl text-gray-400 font-light mb-12 max-w-xl mx-auto leading-relaxed animate-fade-up" style={{animationDelay: '0.2s'}}>
+                                Искусство мяса, культура пива и атмосфера, <br/> которую невозможно подделать.
+                            </p>
+                            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-up" style={{animationDelay: '0.3s'}}>
+                                <button onClick={() => scrollTo('menu')} className="group flex items-center justify-center gap-2 bg-white text-black px-8 py-4 rounded-xl text-lg font-bold uppercase tracking-wide hover:bg-sterling-accent transition duration-300">
+                                    Меню
+                                    <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* About Section */}
+                    <section id="about" className="py-24 px-4 bg-[#050505] relative overflow-hidden scroll-mt-24">
+                        {/* Decorative glow */}
+                        <div className="absolute top-0 right-0 w-96 h-96 bg-sterling-accent/5 rounded-full blur-[128px]"></div>
+                        
+                        <div className="container mx-auto max-w-6xl">
+                            <div className="grid md:grid-cols-2 gap-16 items-center">
+                                <div className="order-2 md:order-1 space-y-8">
+                                    <div>
+                                        <h2 className="font-oswald text-4xl md:text-5xl text-white uppercase leading-tight mb-4">
+                                            Еда с <span className="text-sterling-accent">Характером</span>
+                                        </h2>
+                                        <div className="w-20 h-1 bg-sterling-accent rounded-full"></div>
+                                    </div>
+                                    <p className="text-gray-400 text-lg leading-relaxed">
+                                        Sterling — это не просто паб. Это место, где мы возвели приготовление ребер в культ. Собственная коптильня, выверенные рецепты маринадов и бескомпромиссное качество мяса.
+                                    </p>
+                                    <div className="grid grid-cols-2 gap-8 pt-4">
+                                        <div className="glass-panel p-6 rounded-2xl">
+                                            <div className="text-2xl font-oswald text-white mb-1 uppercase tracking-wide">Своя коптильня</div>
+                                            <div className="text-xs uppercase tracking-wider text-gray-500">Smoke BBQ</div>
+                                        </div>
+                                        <div className="glass-panel p-6 rounded-2xl">
+                                            <div className="text-4xl font-oswald text-white mb-1">20+</div>
+                                            <div className="text-xs uppercase tracking-wider text-gray-500">Видов Пива</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="order-1 md:order-2 relative group">
+                                    <div className="absolute -inset-4 bg-gradient-to-r from-sterling-accent/20 to-purple-500/20 rounded-3xl blur-xl opacity-0 group-hover:opacity-100 transition duration-700"></div>
+                                    <img src="image_1580be.jpg" alt="Food" className="relative rounded-2xl shadow-2xl w-full h-[500px] object-cover grayscale group-hover:grayscale-0 transition duration-700 transform group-hover:scale-[1.02]" />
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Menu Section */}
+                    <section id="menu" className="py-24 px-4 bg-[#0A0A0A] relative scroll-mt-24">
+                        <div className="container mx-auto max-w-6xl relative z-10">
+                            <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+                                <div>
+                                    <h2 className="font-oswald text-5xl md:text-6xl text-white uppercase mb-2">Меню</h2>
+                                    <p className="text-gray-500">Лучшее, что мы умеем готовить</p>
+                                </div>
+                                
+                                {/* Scrollable Tabs */}
+                                <div className="w-full md:w-auto overflow-x-auto no-scrollbar pb-2">
+                                    <div className="flex gap-2">
+                                        {Object.entries(menuData).map(([key, section]) => (
+                                            <button
+                                                key={key}
+                                                onClick={() => setActiveCategory(key)}
+                                                className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold uppercase tracking-wider transition-all duration-300 whitespace-nowrap border-2 flex-shrink-0 ${
+                                                    activeCategory === key
+                                                        ? 'bg-white text-black border-white'
+                                                        : 'bg-transparent text-gray-400 border-transparent hover:border-white/20 hover:text-white'
+                                                }`}
+                                            >
+                                                {section.icon}
+                                                {section.title}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Items Grid - Masonry style feel */}
+                            <div className="grid md:grid-cols-2 gap-6 animate-fade-up">
+                                {menuData[activeCategory].items.map((item, idx) => (
+                                    <div key={idx} className="group glass-panel p-6 rounded-2xl hover:bg-white/5 transition duration-300 cursor-default border-transparent hover:border-white/10">
+                                        <div className="flex justify-between items-start mb-2">
+                                            <h3 className="font-oswald text-xl text-white uppercase tracking-wide pr-4">{item.name}</h3>
+                                            <div className="px-3 py-1 bg-white/10 rounded-lg text-white font-bold whitespace-nowrap group-hover:bg-sterling-accent group-hover:text-black transition-colors">
+                                                {item.price}
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-between items-end">
+                                            <p className="text-gray-500 text-sm leading-relaxed max-w-[80%]">{item.desc}</p>
+                                            {item.weight && <span className="text-xs text-gray-600 font-mono">{item.weight}</span>}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Contacts Block */}
+                    <section id="contacts" className="py-12 px-4 bg-[#050505] scroll-mt-24">
+                        <div className="container mx-auto max-w-6xl">
+                            <div className="bg-[#111] rounded-3xl overflow-hidden flex flex-col md:flex-row border border-white/5">
+                                <div className="md:w-1/2 p-10 md:p-16 flex flex-col justify-center relative">
+                                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-sterling-accent to-transparent"></div>
+                                    <h3 className="font-oswald text-4xl text-white uppercase mb-10">Контакты</h3>
+                                    
+                                    <div className="space-y-8">
+                                        <div className="flex gap-6 group">
+                                            <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center shrink-0 text-gray-400 group-hover:bg-white group-hover:text-black transition duration-300">
+                                                <MapPin size={24} />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Адрес</p>
+                                                <p className="text-white text-lg">Казань, ул. Сабира Ахтямова, 1, корп. 1</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex gap-6 group">
+                                            <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center shrink-0 text-gray-400 group-hover:bg-white group-hover:text-black transition duration-300">
+                                                <Clock size={24} />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">График</p>
+                                                <p className="text-white text-lg">Ежедневно: 11:00 — 00:00</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex gap-6 group">
+                                            <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center shrink-0 text-gray-400 group-hover:bg-white group-hover:text-black transition duration-300">
+                                                <Phone size={24} />
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Связь</p>
+                                                <a href="tel:+78432605000" className="text-white text-lg hover:text-sterling-accent transition">+7 (843) 260-50-00</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="md:w-1/2 h-[400px] md:h-auto bg-gray-900 relative grayscale hover:grayscale-0 transition duration-700">
+                                    <iframe 
+                                        src="https://yandex.ru/map-widget/v1/?ll=49.215660%2C55.788460&z=17&pt=49.215660,55.788460,pm2rdm"
+                                        width="100%" 
+                                        height="100%" 
+                                        frameBorder="0"
+                                        className="opacity-80 hover:opacity-100 transition"
+                                    ></iframe>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Footer */}
+                    <footer className="bg-black text-white py-12 border-t border-white/5">
+                        <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
+                            <div className="flex items-center gap-3 opacity-60 hover:opacity-100 transition">
+                                <img src="image_158898.png" alt="Logo" className="h-8 w-8 object-contain grayscale" />
+                                <span className="font-oswald text-lg uppercase tracking-widest">Sterling</span>
+                            </div>
+                            <p className="text-gray-600 text-sm">© 2026 Sterling Gastro Pub.</p>
+                            <div className="flex gap-4">
+                                <a href="#" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white hover:text-black transition"><Instagram size={18} /></a>
+                            </div>
+                        </div>
+                    </footer>
+
+                    {/* Modern Booking Modal */}
+                    {isModalOpen && (
+                        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fadeIn">
+                            <div className="bg-[#111] border border-white/10 p-8 md:p-10 w-full max-w-md relative rounded-3xl shadow-2xl">
+                                <button onClick={() => setIsModalOpen(false)} className="absolute top-6 right-6 text-gray-500 hover:text-white transition">
+                                    <X size={24} />
+                                </button>
+                                
+                                <h3 className="font-oswald text-4xl text-white uppercase mb-2">Бронь стола</h3>
+                                <p className="text-gray-500 mb-8 text-sm">Заполните форму, и мы свяжемся для подтверждения.</p>
+                                
+                                <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); alert('Заявка отправлена!'); setIsModalOpen(false); }}>
+                                    <div className="space-y-4">
+                                        <input type="text" placeholder="Ваше Имя" className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 text-white placeholder-gray-600 outline-none focus:border-white/30 focus:bg-white/10 transition" required />
+                                        <input type="tel" placeholder="Телефон" className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 text-white placeholder-gray-600 outline-none focus:border-white/30 focus:bg-white/10 transition" required />
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <input type="date" className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 text-white placeholder-gray-600 outline-none focus:border-white/30 focus:bg-white/10 transition text-sm" required />
+                                            <input type="time" className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 text-white placeholder-gray-600 outline-none focus:border-white/30 focus:bg-white/10 transition text-sm" required />
+                                        </div>
+                                        <input type="number" placeholder="Количество гостей" className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 text-white placeholder-gray-600 outline-none focus:border-white/30 focus:bg-white/10 transition" required />
+                                    </div>
+                                    
+                                    <button type="submit" className="w-full bg-white text-black py-4 rounded-xl font-bold uppercase tracking-widest hover:bg-sterling-accent transition mt-6">
+                                        Отправить
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
